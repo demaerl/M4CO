@@ -8,9 +8,12 @@ solve satisfy;
 
 % No person shakes their own hand, therefore, diagonals contain only 0:
 constraint forall(i in 1..10)(Handshakes[i,i] = 0);
-% ensure symmetry of Handshakes (i.e. if person j shook person i's hand, person i also shook person j's hand:
+% Ensure symmetry of Handshakes (i.e. if person j shook person i's hand, person i also shook person j's hand:
 constraint forall(i,j in 1..10)(Handshakes[i,j] = Handshakes[j,i]);
 % No person shakes their partner's hand:
 constraint forall(i in 1..5)(Handshakes[2*i, 2*i-1] = 0);
 % Each person shook a different number of hands:
 constraint all_different([sum(Handshakes[i,..]) | i in 2..10]);
+
+% Part C: Check if there is any other solution than 4
+constraint sum(Handshakes[2,..]) != 4;
