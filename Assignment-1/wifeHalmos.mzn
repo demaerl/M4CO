@@ -16,4 +16,4 @@ constraint forall(i in 1..5)(Handshakes[2*i, 2*i-1] = 0);
 constraint all_different([sum(Handshakes[i,..]) | i in 2..10]);
 
 % Part C: Check if there is any other solution than 4
-constraint sum(Handshakes[2,..]) != 4;
+% constraint sum(Handshakes[2,..]) != 4;
