@@ -12,7 +12,7 @@ constraint forall(i in 1..10)(Handshakes[i,i] = 0);
 constraint forall(i,j in 1..10)(Handshakes[i,j] = Handshakes[j,i]);
 % No person shakes their partner's hand:
 constraint forall(i in 1..5)(Handshakes[2*i, 2*i-1] = 0);
-% Each person shook a different number of hands:
+% Each person shakes a different number of hands (except for Halmos):
 constraint all_different([sum(Handshakes[i,..]) | i in 2..10]);
 
 var 0..8: wifeHandshakes;
