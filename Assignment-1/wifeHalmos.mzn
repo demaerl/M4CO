@@ -3,9 +3,11 @@ include "globals.mzn";
 % Handshakes[i,j] = 1 if person i shook person j's hand.
 % Couples are represented consecutively in each array; Halmos has index 1, and his wife has index 2.
 array[1..10, 1..10] of var 0..1: Handshakes;
+var 0..8: wifeHands;
 
 solve satisfy;
 
+constraint wifeHands = sum(Handshakes[2,..]);
 % No person shakes their own hand, therefore, diagonals contain only 0:
 constraint forall(i in 1..10)(Handshakes[i,i] = 0);
 % Ensure symmetry of Handshakes (i.e. if person j shook person i's hand, person i also shook person j's hand:
@@ -17,3 +19,5 @@ constraint all_different([sum(Handshakes[i,..]) | i in 2..10]);
 
 % Part C: Check if there is any other solution than 4
 % constraint sum(Handshakes[2,..]) != 4;
+
+output [show(wifeHands)];
