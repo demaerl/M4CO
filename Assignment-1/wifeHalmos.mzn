@@ -15,5 +15,7 @@ constraint forall(i in 1..5)(Handshakes[2*i, 2*i-1] = 0);
 % Each person shook a different number of hands:
 constraint all_different([sum(Handshakes[i,..]) | i in 2..10]);
 
+var 0..8: wifeHandshakes;
+
 % Part C: Check if there is any other solution than 4
-constraint sum(Handshakes[2,..]) != 4;
+%constraint sum(Handshakes[2,..]) != 4;
