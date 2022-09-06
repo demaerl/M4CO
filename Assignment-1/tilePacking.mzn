@@ -25,7 +25,9 @@ constraint w = max([x[i] + i | i in 1..n]);
 % and the height of the resulting rectangle:
 constraint h = max([y[i] + i | i in 1..n]); 
 
-% Part C
+% For part C:
+% Place the largest tile in the lower-left quadrant of the bounding rectangle,
+% in order to avoid symmetric solutions 
 constraint x[n] * 2 < w;
 constraint y[n] * 2 < h;
 
