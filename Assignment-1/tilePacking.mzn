@@ -25,5 +25,9 @@ constraint w = max([x[i] + i | i in 1..n]);
 % and the height of the resulting rectangle:
 constraint h = max([y[i] + i | i in 1..n]); 
 
+% Part C
+constraint x[n] * 2 < w;
+constraint y[n] * 2 < h;
+
 % minimize width and height of rectangle
 solve minimize w*h;
