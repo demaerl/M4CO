@@ -2,7 +2,7 @@ include "globals.mzn";
 
 % Number of tiles:
 int: n;
-
+% The side length of each tile:
 array[1..n] of int: side = 1..n;
 % The maximal side lengths the resulting rectangle can obtain
 % is the sum of all the lengths of the tiles:
