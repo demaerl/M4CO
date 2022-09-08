@@ -5,10 +5,12 @@ int: n = 5;
 % Handshakes[i,j] = 1 if person i shook person j's hand.
 % Couples are represented consecutively in each array; Halmos has index 1, and his wife has index 2.
 array[1..2*n, 1..2*n] of var 0..1: Handshakes;
+% The number of hands Halmos's wife shook
 var 0..(2*n)-2: wifeHands;
 
 solve satisfy;
 
+% Halmos's wife's handshake count is equal to the sum of the second row in Handshakes 
 constraint wifeHands = sum(Handshakes[2,..]);
 % No person shakes their own hand, therefore, diagonals contain only 0:
 constraint forall(i in 1..2*n)(Handshakes[i,i] = 0);

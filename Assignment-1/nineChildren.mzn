@@ -2,13 +2,15 @@ include "globals.mzn";
 
 % number of children:
 int: n = 9;
-% array of integers representing the children’s ages:
+% array of integers representing the children's ages:
 array[1..n] of var 0..150: Children;
 % integer representing the parent's age:
 var 1..150: parent;
 
 % find solution:
 solve satisfy;
+% find minimal solution
+%solve minimize parent;
 
 % ensure children are not born at the same time:
 constraint all_different(Children);

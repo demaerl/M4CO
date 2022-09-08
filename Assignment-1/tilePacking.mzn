@@ -7,7 +7,9 @@ array[1..n] of int: side = 1..n;
 % The maximal side lengths the resulting rectangle can obtain
 % is the sum of all the lengths of the tiles:
 int: maxDim = sum(1..n);
+% The width of the bounding rectangle
 var 1..maxDim: w;
+% The height of the bounding rectangle
 var 1..maxDim: h;
 
 % Array for the x-coordinates of the tiles:
@@ -31,5 +33,5 @@ constraint h = max([y[i] + i | i in 1..n]);
 constraint x[n] * 2 < w;
 constraint y[n] * 2 < h;
 
-% minimize width and height of rectangle
+% minimize width and height of the bounding rectangle
 solve minimize w*h;
