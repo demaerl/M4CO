@@ -1,0 +1,8 @@
+weeks =  6 ;
+types =  2 ;
+Order = [| 
+0,0,0,1,0,1|
+0,0,0,0,0,1|];
+storageCost =  50 ;
+SetupCost = [| 0,529|
+130,0|];
