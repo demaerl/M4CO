@@ -29,9 +29,12 @@ array[1..types,1..types] of int: SetupCost;
 %----Derived parameters----
 int: spacecrafts = sum(Order); % total #spacecrafts to assemble
 % DueWeek[s] is the week that spacecraft s is due:
-array[1..spacecrafts] of int: DueWeek = % [ ... | ... in ... where ... ];
+array[1..spacecrafts] of int: DueWeek = [ column | column in 1..weeks, row in 1..types where Order[row, column] = 1];
 % Type[s] is the type of spacecraft s:
-array[1..spacecrafts] of int: Type = % [ ... | ... in ... where ... ];
+array[1..spacecrafts] of int: Type = [ row | column in 1..weeks, row in 1..types where Order[row, column] = 1];
+
+output [show(DueWeek)];
+output [show(Type)];
 
 %----Decision variables----
 % ...
