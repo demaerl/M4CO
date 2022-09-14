@@ -35,19 +35,19 @@ array[1..spacecrafts] of int: Type = [ row | column in 1..weeks, row in 1..types
 % Schedule[t, w] is the number of spacecrafts of type t to be built by week w:
 array[1..types, 1..weeks] of int: Schedule = array2d(1..types, 1..weeks, [sum(Order[row, 1..column]) | row in 1..types, column in 1..weeks]);
 
-%----Viewpoint 1----
-% Week[w] denotes which spacecraft (if any) to build in week w:
-array[1..weeks] of var 0..types: Week;
+%----Viewpoint 2----
+% Spacecraft[s] denotes in which week spacecraft s is built:
+array[1..spacecrafts] of var 1..weeks: Spacecraft;
+
+constraint all_different(Spacecraft);
 
 % By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
-constraint forall(t in 1..types, w in 1..weeks)(count(Week[1..w], t) >= Schedule[t, w]);
-% Ensure that the correct amount of spacecrafts is built (as per Order):
-constraint forall(t in 1..types)(count(Week, t) = Schedule[t, weeks]);
+constraint forall(s in 1..spacecrafts)(Spacecraft[s] <= DueWeek[s]);
 
-%output [show(DueWeek),"\n"];
-%output [show(Type), "\n"];
+output [show(DueWeek),"\n"];
+output [show(Type), "\n"];
 %output [show2d(Schedule)];
-%output [show(Week)];
+output [show(Spacecraft)];
 
 solve satisfy;
 

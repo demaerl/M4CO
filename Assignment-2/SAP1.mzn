@@ -44,10 +44,10 @@ constraint forall(t in 1..types, w in 1..weeks)(count(Week[1..w], t) >= Schedule
 % Ensure that the correct amount of spacecrafts is built (as per Order):
 constraint forall(t in 1..types)(count(Week, t) = Schedule[t, weeks]);
 
-%output [show(DueWeek),"\n"];
-%output [show(Type), "\n"];
+output [show(DueWeek),"\n"];
+output [show(Type), "\n"];
 %output [show2d(Schedule)];
-%output [show(Week)];
+output [show(Week)];
 
 solve satisfy;
 
