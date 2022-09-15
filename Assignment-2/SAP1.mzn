@@ -28,6 +28,8 @@ array[1..types,1..types] of int: SetupCost;
 
 %----Derived parameters----
 int: spacecrafts = sum(Order); % total #spacecrafts to assemble
+% the maximal possible setup cost, used to tighten the domains for totalSetupCost:
+int: maxSetupCost = weeks * max(SetupCost); 
 % DueWeek[s] is the week that spacecraft s is due:
 array[1..spacecrafts] of int: DueWeek = [ column | column in 1..weeks, row in 1..types, amount in 1..Order[row, column] where Order[row, column] >= 0];
 % Type[s] is the type of spacecraft s:
@@ -42,7 +44,11 @@ array[1..types, 1..weeks] of int: Schedule = array2d(1..types, 1..weeks, [sum(Or
 % Week[w] denotes which spacecraft (if any) to build in week w:
 array[1..weeks] of var 0..types: Week;
 
+%array[1..spacecrafts] of var opt 1..types: TypeSorted = [ Week[w]| w in 1..weeks where Week[w] != 0];
+
+% % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
 var int: totalStorageCost = sum([ (count(Week[1..w], t) - Schedule[t, w]) * storageCost | w in 1..weeks, t in 1..types where count(Week[1..w], t) > Schedule[t, w]]);
+% var int: totalSetupCost = sum([ SetupCost[TypeSorted[s], TypeSorted[s+1]]| s in 1..spacecrafts-1]);
 
 %----Constraints----
 % By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
@@ -51,8 +57,11 @@ constraint forall(t in 1..types, w in 1..weeks)(count(Week[1..w], t) >= Schedule
 constraint forall(t in 1..types)(count(Week, t) = Schedule[t, weeks]);
 
 %----Objective----
+%solve minimize totalStorageCost + totalSetupCost;
 solve minimize totalStorageCost;
 
 %----Output----
-output [show(Week), "\n"];
-output [show(totalStorageCost)];
+output [show2d(Schedule), "\n"];
+%output [show(totalStorageCost + totalSetupCost)];
+%output [show(totalStorageCost)];
+output [show(Week)];
