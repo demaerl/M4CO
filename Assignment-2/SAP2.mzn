@@ -37,8 +37,6 @@ int: maxStorageCost = (weeks*(weeks-1))*storageCost div 2;
 array[1..spacecrafts] of int: DueWeek = [ w | t in 1..types, w in 1..weeks, amount in 1..Order[t, w] where Order[t, w] >= 0];
 % Type[s] is the type of spacecraft s:
 array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount in 1..Order[t, w] where Order[t, w] >= 0];
-% Schedule[t, w] is the number of spacecrafts of type t to be built by week w:
-array[1..types, 1..weeks] of int: Schedule = array2d(1..types, 1..weeks, [sum(Order[row, 1..column]) | row in 1..types, column in 1..weeks]);
 
 %----Viewpoint 2----
 
@@ -49,7 +47,7 @@ array[1..spacecrafts] of var 1..weeks: Spacecraft;
 % Arrange Type such that the spacecrafts in SortedType are in chronological order of their assembly:
 array[1..spacecrafts] of var 1..types: TypeSorted = [Type[s] | s in arg_sort(Spacecraft)];
 % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
-var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Spacecraft[s]) * storageCost | s in 1..spacecrafts where Spacecraft[s] < DueWeek[s] ]);
+var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Spacecraft[s]) * storageCost | s in 1..spacecrafts]);
 % 
 var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[TypeSorted[s], TypeSorted[s+1]]| s in 1..spacecrafts-1]);
 
