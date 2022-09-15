@@ -29,8 +29,6 @@ array[1..types,1..types] of int: SetupCost;
 %----Derived parameters----
 int: spacecrafts = sum(Order); % total #spacecrafts to assemble
 
-output [show(Order), "\n"];
-output [show(spacecrafts)];
 % DueWeek[s] is the week that spacecraft s is due:
 array[1..spacecrafts] of int: DueWeek = [ column | column in 1..weeks, row in 1..types, amount in 1..Order[row, column] where Order[row, column] >= 0];
 % Type[s] is the type of spacecraft s:
@@ -39,30 +37,22 @@ array[1..spacecrafts] of int: Type = [ row | column in 1..weeks, row in 1..types
 array[1..types, 1..weeks] of int: Schedule = array2d(1..types, 1..weeks, [sum(Order[row, 1..column]) | row in 1..types, column in 1..weeks]);
 
 %----Viewpoint 2----
+
+%----Decision variables----
 % Spacecraft[s] denotes in which week spacecraft s is built:
 array[1..spacecrafts] of var 1..weeks: Spacecraft;
+% If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
+var int: totalStorageCost = sum([ (DueWeek[s] - Spacecraft[s]) * storageCost | s in 1..spacecrafts where Spacecraft[s] < DueWeek[s] ]);
 
+%----Constraints----
 constraint all_different(Spacecraft);
 
 % By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
 constraint forall(s in 1..spacecrafts)(Spacecraft[s] <= DueWeek[s]);
 
-output [show(DueWeek),"\n"];
-output [show(Type), "\n"];
-%output [show2d(Schedule)];
-output [show(Spacecraft)];
-
-solve satisfy;
-
-
-%----Decision variables----
-% ...
-
-%----Constraints----
-% ...
-
 %----Objective----
-% solve minimize ...;
+solve minimize totalStorageCost;
 
 %----Output----
-% output ...;
+output [show(Spacecraft), "\n"];
+output [show(totalStorageCost), "\n"];

@@ -36,30 +36,23 @@ array[1..spacecrafts] of int: Type = [ row | column in 1..weeks, row in 1..types
 array[1..types, 1..weeks] of int: Schedule = array2d(1..types, 1..weeks, [sum(Order[row, 1..column]) | row in 1..types, column in 1..weeks]);
 
 %----Viewpoint 1----
+
+%----Decision variables----
+
 % Week[w] denotes which spacecraft (if any) to build in week w:
 array[1..weeks] of var 0..types: Week;
 
+var int: totalStorageCost = sum([ (count(Week[1..w], t) - Schedule[t, w]) * storageCost | w in 1..weeks, t in 1..types where count(Week[1..w], t) > Schedule[t, w]]);
+
+%----Constraints----
 % By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
 constraint forall(t in 1..types, w in 1..weeks)(count(Week[1..w], t) >= Schedule[t, w]);
 % Ensure that the correct amount of spacecrafts is built (as per Order):
 constraint forall(t in 1..types)(count(Week, t) = Schedule[t, weeks]);
 
-%output [show(DueWeek),"\n"];
-%output [show(Type), "\n"];
-%output [show2d(Schedule)];
-%output [show(Week)];
-
-solve satisfy;
-
-
-%----Decision variables----
-% ...
-
-%----Constraints----
-% ...
-
 %----Objective----
-% solve minimize ...;
+solve minimize totalStorageCost;
 
 %----Output----
-% output ...;
+output [show(Week), "\n"];
+output [show(totalStorageCost)];
