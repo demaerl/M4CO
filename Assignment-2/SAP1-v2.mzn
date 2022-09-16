@@ -43,25 +43,25 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 
 %----Decision variables----
 
-% Week[w] denotes which spacecraft (if any) to build in week w:
-% 0 is used as dummy value. Therefore, Week[w] = 0 denotes that no spacecraft is built in week w.
-array[1..weeks] of var 0..spacecrafts: Week;
-% WeekType[w] denotes which type of spacecraft to build in week w:
+% Spacecraft[w] denotes which spacecraft (if any) to build in week w:
+% 0 is used as dummy value. Therefore, Spacecraft[w] = 0 denotes that no spacecraft is built in week w.
+array[1..weeks] of var 0..spacecrafts: Spacecraft;
+% WeekTyped[w] denotes which type of spacecraft to build in week w:
 array[1..weeks] of var 0..types: WeekType;
 % If a spacecraft is assembled before its due week, a storageCost for every week it is not due incurs.
-% Weeks where no spacecraft is assembled (i.e. Week[w] = 0) are ignored.
-var 0..maxStorageCost: totalStorageCost = sum([(DueWeek[Week[w]] - w) * storageCost | w in 1..weeks where Week[w] != 0]);
+% Weeks where no spacecraft is assembled (i.e. Spacecraft[w] = 0) are ignored.
+var 0..maxStorageCost: totalStorageCost = sum([(DueWeek[Spacecraft[w]] - w) * storageCost | w in 1..weeks where Spacecraft[w] != 0]);
 
 var 0..maxSetupCost: totalSetupCost = sum([SetupCost[WeekType[w], WeekType[w+1]] | w in 1..weeks-1 ]);
 
 %----Constraints----
 % By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
-constraint forall(w in 1..weeks where Week[w] != 0)(DueWeek[Week[w]] >= w);
+constraint forall(w in 1..weeks where Spacecraft[w] != 0)(DueWeek[Spacecraft[w]] >= w);
 % Ensure that the correct amount of spacecrafts is built (as per Order):
-constraint forall(s in 1..spacecrafts)(count(Week, s) = 1);
-% Ensure that the type of spacecraft built in week w according to Week matches with the type according to WeekType.
-% In a week where no spacecraft is assembled (i.e. Week[w] = 0), it is irrelevant which value WeekType takes at index w. 
-constraint forall(w in 1..weeks where Week[w] != 0)(Type[Week[w]] = WeekType[w]);
+constraint forall(s in 1..spacecrafts)(count(Spacecraft, s) = 1);
+% Ensure that the type of spacecraft built in week w according to Spacecraft matches up with the type according to WeekType.
+% In a week where no spacecraft is assembled (i.e. Spacecraft[w] = 0), it is irrelevant which value WeekType takes at index w. 
+constraint forall(w in 1..weeks where Spacecraft[w] != 0)(Type[Spacecraft[w]] = WeekType[w]);
 
 %----Objective----
 %solve minimize totalStorageCost;
@@ -69,7 +69,7 @@ solve minimize totalStorageCost + totalSetupCost;
 
 %----Output----
 output [show2d(Order), "\n"];
-output [show(Week), "\n"];
+output [show(Type), "\n"];
+output [show(Spacecraft), "\n"];
 output [show(WeekType), "\n"];
-output [show(totalStorageCost), "\n"];
 output [show(totalStorageCost + totalSetupCost)];
