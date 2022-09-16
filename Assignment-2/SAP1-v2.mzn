@@ -46,7 +46,7 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 % Week[w] denotes which spacecraft (if any) to build in week w:
 % 0 is used as dummy value. Therefore, Week[w] = 0 denotes that no spacecraft is built in week w.
 array[1..weeks] of var 0..spacecrafts: Week;
-% WeekTyped[w] denotes which type of spacecraft to build in week w:
+% WeekType[w] denotes which type of spacecraft to build in week w:
 array[1..weeks] of var 0..types: WeekType;
 % If a spacecraft is assembled before its due week, a storageCost for every week it is not due incurs.
 % Weeks where no spacecraft is assembled (i.e. Week[w] = 0) are ignored.
@@ -59,7 +59,7 @@ var 0..maxSetupCost: totalSetupCost = sum([SetupCost[WeekType[w], WeekType[w+1]]
 constraint forall(w in 1..weeks where Week[w] != 0)(DueWeek[Week[w]] >= w);
 % Ensure that the correct amount of spacecrafts is built (as per Order):
 constraint forall(s in 1..spacecrafts)(count(Week, s) = 1);
-% Ensure that the type of spacecraft built in week w according to Week matches up with the type according to WeekType.
+% Ensure that the type of spacecraft built in week w according to Week matches with the type according to WeekType.
 % In a week where no spacecraft is assembled (i.e. Week[w] = 0), it is irrelevant which value WeekType takes at index w. 
 constraint forall(w in 1..weeks where Week[w] != 0)(Type[Week[w]] = WeekType[w]);
 
