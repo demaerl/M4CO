@@ -55,7 +55,6 @@ var 0..maxSetupCost: totalSetupCost = sum([SetupCost[WeekType[w], WeekType[w+1]]
 % Ensure that each spacecraft is built either before it is due or in the week it is due:
 constraint forall(w in 1..weeks where Spacecraft[w] != 0)(DueWeek[Spacecraft[w]] >= w);
 % Ensure that each spacecraft is built (and not more than once):
-%constraint forall(s in 1..spacecrafts)(count(Spacecraft, s) = 1);
 constraint global_cardinality(Spacecraft, 1..spacecrafts, [ 1 | s in 1..spacecrafts]);
 % Ensure that the type of spacecraft built in week w (if any) according to Spacecraft matches with the type according to WeekType.
 % Two-way channeling constraint 

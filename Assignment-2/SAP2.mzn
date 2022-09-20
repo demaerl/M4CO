@@ -41,8 +41,7 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 %----Decision variables----
 % Spacecraft[s] denotes in which week spacecraft s is built:
 array[1..spacecrafts] of var 1..weeks: Spacecraft;
-
-% % Week[w] denotes which type of spacecraft to build in week w:
+% Week[w] denotes which type of spacecraft to build in week w:
 array[1..weeks] of var 0..types: Week;
 
 % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
