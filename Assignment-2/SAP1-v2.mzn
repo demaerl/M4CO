@@ -42,7 +42,8 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 % Spacecraft[w] denotes which spacecraft (if any) to build in week w:
 % 0 is used as dummy value. Therefore, Spacecraft[w] = 0 denotes that no spacecraft is built in week w.
 array[1..weeks] of var 0..spacecrafts: Spacecraft;
-% WeekTyped[w] denotes which type of spacecraft to build in week w:
+% WeekTyped[w] denotes which type of spacecraft to build in week w.
+% WeekType is non-mutually redundant with the variable Spacecraft:
 array[1..weeks] of var 1..types: WeekType;
 % If a spacecraft is assembled before its due week, a storageCost for every week it is not due incurs.
 % Weeks where no spacecraft is assembled (i.e. Spacecraft[w] = 0) are ignored:
@@ -56,7 +57,7 @@ constraint forall(w in 1..weeks where Spacecraft[w] != 0)(DueWeek[Spacecraft[w]]
 % Ensure that each spacecraft is built (and not more than once):
 constraint forall(s in 1..spacecrafts)(count(Spacecraft, s) = 1);
 % Ensure that the type of spacecraft built in week w (if any) according to Spacecraft matches with the type according to WeekType.
-% In a week where no spacecraft is assembled (i.e. Spacecraft[w] = 0), it is irrelevant which value WeekType[w] takes. 
+% Two-way channeling constraint 
 constraint forall(w in 1..weeks where Spacecraft[w] != 0)(Type[Spacecraft[w]] = WeekType[w]);
 
 %----Objective----
