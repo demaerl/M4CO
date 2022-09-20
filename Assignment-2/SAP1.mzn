@@ -28,41 +28,42 @@ array[1..types,1..types] of int: SetupCost;
 
 %----Derived parameters----
 int: spacecrafts = sum(Order); % total #spacecrafts to assemble
-% the maximal possible setup cost, used to tighten the domains for totalSetupCost:
-int: maxSetupCost = weeks * max(SetupCost); 
+% The maximal possible setup cost, used to tighten the domain of totalSetupCost:
+int: maxSetupCost = weeks * max(SetupCost);
+% The maximal possible storage cost, used to tighten the domain of totalStorageCost:
+int: maxStorageCost = (weeks*(weeks-1))*storageCost div 2;
 % DueWeek[s] is the week that spacecraft s is due:
 array[1..spacecrafts] of int: DueWeek = [ w | t in 1..types, w in 1..weeks, amount in 1..Order[t, w] where Order[t, w] >= 0];
 % Type[s] is the type of spacecraft s:
-array[1..spacecrafts] of int: Type = [ t | w in 1..weeks, t in 1..types, amount in 1..Order[t, w] where Order[t, w] >= 0];
-% Schedule[t, w] is the number of spacecrafts of type t to be built by week w:
-array[1..types, 1..weeks] of int: Schedule = array2d(1..types, 1..weeks, [sum(Order[row, 1..column]) | row in 1..types, column in 1..weeks]);
-
-%----Viewpoint 1----
+array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount in 1..Order[t, w] where Order[t, w] >= 0];
 
 %----Decision variables----
 
-% Week[w] denotes which spacecraft (if any) to assemble in week w.
-% 0 is used as dummy value, therefore Week[w] = 0 denotes that no spacecraft is assembled in week w.
-array[1..weeks] of var 0..types: Week;
-
-% array[1..spacecrafts] of var opt 1..types: TypeSorted = [ Week[w]| w in 1..weeks where Week[w] != 0];
-%array[1..weeks] of var 1..types: NoDummyWeek = [ Week[w]  Week[w] != 0  | w in weeks..1]
-
-% % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
-var int: totalStorageCost = sum([ (count(Week[1..w], t) - Schedule[t, w]) * storageCost | w in 1..weeks, t in 1..types where count(Week[1..w], t) > Schedule[t, w]]);
-% var int: totalSetupCost = sum([ SetupCost[TypeSorted[s], TypeSorted[s+1]]| s in 1..spacecrafts-1]);
+% Spacecraft[w] denotes which spacecraft (if any) to build in week w:
+% 0 is used as dummy value. Therefore, Spacecraft[w] = 0 denotes that no spacecraft is built in week w.
+array[1..weeks] of var 0..spacecrafts: Spacecraft;
+% WeekTyped[w] denotes which type of spacecraft to build in week w.
+% WeekType is non-mutually redundant with the variable Spacecraft:
+array[1..weeks] of var 1..types: WeekType;
+% If a spacecraft is assembled before its due week, a storageCost for every week it is not due incurs.
+% Weeks where no spacecraft is assembled (i.e. Spacecraft[w] = 0) are ignored:
+var 0..maxStorageCost: totalStorageCost = sum([(DueWeek[Spacecraft[w]] - w) * storageCost | w in 1..weeks where Spacecraft[w] != 0]);
+% If the types of spacecrafts built in two consecutive weeks differ, a setup cost incurs:
+var 0..maxSetupCost: totalSetupCost = sum([SetupCost[WeekType[w], WeekType[w+1]] | w in 1..weeks-1 ]);
 
 %----Constraints----
-% By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
-constraint forall(t in 1..types, w in 1..weeks)(count(Week[1..w], t) >= Schedule[t, w]);
-% Ensure that the correct amount of spacecrafts is built (as per Order):
-constraint forall(t in 1..types)(count(Week, t) = Schedule[t, weeks]);
+% Ensure that each spacecraft is built either before it is due or in the week it is due:
+constraint forall(w in 1..weeks where Spacecraft[w] != 0)(DueWeek[Spacecraft[w]] >= w);
+% Ensure that each spacecraft is built (and not more than once):
+%constraint forall(s in 1..spacecrafts)(count(Spacecraft, s) = 1);
+constraint global_cardinality(Spacecraft, 1..spacecrafts, [ 1 | s in 1..spacecrafts]);
+% Ensure that the type of spacecraft built in week w (if any) according to Spacecraft matches with the type according to WeekType.
+% Two-way channeling constraint 
+constraint forall(w in 1..weeks where Spacecraft[w] != 0)(Type[Spacecraft[w]] = WeekType[w]);
 
 %----Objective----
-%solve minimize totalStorageCost + totalSetupCost;
-solve minimize totalStorageCost;
+% Minimize the total cost, consisting of totalStorageCost and totalSetupCost:
+solve minimize totalStorageCost + totalSetupCost;
 
 %----Output----
-%output [show(totalStorageCost + totalSetupCost)];
-output [show(Week), "\n"];
-output [show(totalStorageCost)];
+output [show(totalStorageCost + totalSetupCost)];
