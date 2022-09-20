@@ -58,7 +58,8 @@ var 0..maxSetupCost: totalSetupCost = sum([SetupCost[WeekType[w], WeekType[w+1]]
 % By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
 constraint forall(w in 1..weeks where Week[w] != 0)(DueWeek[Week[w]] >= w);
 % Ensure that the correct amount of spacecrafts is built (as per Order):
-constraint forall(s in 1..spacecrafts)(count(Week, s) = 1);
+constraint global_cardinality(Week, 1..spacecrafts, [1 | i in 1..spacecrafts]);
+
 % Ensure that the type of spacecraft built in week w according to Week matches up with the type according to WeekType.
 % In a week where no spacecraft is assembled (i.e. Week[w] = 0), it is irrelevant which value WeekType takes at index w. 
 constraint forall(w in 1..weeks where Week[w] != 0)(Type[Week[w]] = WeekType[w]);
