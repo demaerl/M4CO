@@ -43,33 +43,26 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 %----Decision variables----
 % Spacecraft[s] denotes in which week spacecraft s is built:
 array[1..spacecrafts] of var 1..weeks: Spacecraft;
-
-% % Week[w] denotes which type of spacecraft to build in week w:
-array[1..weeks] of var 0..types: Week;
-
-%----Old approach----
 % TypeSorted[i] denotes the type of the i'th spacecraft to be built, or in other words:
 % Arrange Type such that the spacecrafts in SortedType are in chronological order of their assembly:
-%array[1..spacecrafts] of var 1..types: TypeSorted = [Type[s] | s in arg_sort(Spacecraft)];
-
+array[1..spacecrafts] of var 1..types: TypeSorted = [Type[s] | s in arg_sort(Spacecraft)];
 % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
 var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Spacecraft[s]) * storageCost | s in 1..spacecrafts]);
 % 
-var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[Week[w], Week[w+1]]| w in 1..weeks-1]);
+var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[TypeSorted[s], TypeSorted[s+1]]| s in 1..spacecrafts-1]);
 
 %----Constraints----
 % Each spacecraft is built exactly once:
 constraint all_different(Spacecraft);
-% Ensure that for each spacecraft s, s is assembled in a week before or in the due week:
+
+% By week w, we have produced at least as many spacecrafts of type t as dictated by the schedule:
 constraint forall(s in 1..spacecrafts)(Spacecraft[s] <= DueWeek[s]);
-% Ensure that for each spacecraft s, the type of s (Type[s]) matches up with the type that is built in the week in which s is built (Week[Spacecraft[s]]):
-constraint forall(s in 1..spacecrafts)( Week[Spacecraft[s]] = Type[s]);
 
 %----Objective----
 solve minimize totalStorageCost + totalSetupCost;
 
 %----Output----
-output [show(Spacecraft), "\n"];
+%output [show(Spacecraft), "\n"];
 %output [show(totalStorageCost), "\n"];
 %output [show(SortedType)];
 output [show(totalStorageCost + totalSetupCost)];
