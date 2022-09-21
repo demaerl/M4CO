@@ -39,23 +39,24 @@ array[1..spacecrafts] of int: DueWeek = [ w | t in 1..types, w in 1..weeks, amou
 array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount in 1..Order[t, w] where Order[t, w] >= 0];
 
 %----Decision variables----
-% Spacecraft[s] denotes in which week spacecraft s is built:
-array[1..spacecrafts] of var 1..weeks: Spacecraft;
-% Week[w] denotes which type of spacecraft to build in week w:
-array[1..weeks] of var 0..types: Week;
+% Week[s] denotes in which week spacecraft s is built:
+array[1..spacecrafts] of var 1..weeks: Week;
+% FactorySetup[w] denotes which type of spacecraft the factory is set up to build in week w.
+% FactorySetup is non-mutually redundant with the array of variables Week:
+array[1..weeks] of var 0..types: FactorySetup;
 
 % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
-var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Spacecraft[s]) * storageCost | s in 1..spacecrafts]);
-% 
-var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[Week[w], Week[w+1]]| w in 1..weeks-1]);
+var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Week[s]) * storageCost | s in 1..spacecrafts ]);
+% If the types of spacecrafts built in two consecutive weeks differ, a setup cost incurs:
+var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[FactorySetup[w], FactorySetup[w+1]]| w in 1..weeks-1 ]);
 
 %----Constraints----
 % Each spacecraft is built exactly once:
-constraint all_different(Spacecraft);
+constraint all_different(Week);
 % Ensure that for each spacecraft s, s is assembled in a week before or in the due week:
-constraint forall(s in 1..spacecrafts)(Spacecraft[s] <= DueWeek[s]);
-% Ensure that for each spacecraft s, the type of s (Type[s]) matches up with the type that is built in the week in which s is built (Week[Spacecraft[s]]):
-constraint forall(s in 1..spacecrafts)( Week[Spacecraft[s]] = Type[s]);
+constraint forall(s in 1..spacecrafts)(Week[s] <= DueWeek[s]);
+% Ensure that for each spacecraft s, Type[s] matches with the type that the factory is set up to build for the week s is built.
+constraint forall(s in 1..spacecrafts)(FactorySetup[Week[s]] = Type[s]);
 
 %----Objective----
 solve minimize totalStorageCost + totalSetupCost;

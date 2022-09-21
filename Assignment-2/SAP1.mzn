@@ -42,14 +42,14 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 % Spacecraft[w] denotes which spacecraft (if any) to build in week w:
 % 0 is used as dummy value. Therefore, Spacecraft[w] = 0 denotes that no spacecraft is built in week w.
 array[1..weeks] of var 0..spacecrafts: Spacecraft;
-% WeekTyped[w] denotes which type of spacecraft to build in week w.
-% WeekType is non-mutually redundant with the variable Spacecraft:
-array[1..weeks] of var 1..types: WeekType;
+% FactorySetup[w] denotes which type of spacecraft to build in week w.
+% FactorySetup is non-mutually redundant with the array of variables Spacecraft:
+array[1..weeks] of var 1..types: FactorySetup;
 % If a spacecraft is assembled before its due week, a storageCost for every week it is not due incurs.
 % Weeks where no spacecraft is assembled (i.e. Spacecraft[w] = 0) are ignored:
 var 0..maxStorageCost: totalStorageCost = sum([(DueWeek[Spacecraft[w]] - w) * storageCost | w in 1..weeks where Spacecraft[w] != 0]);
 % If the types of spacecrafts built in two consecutive weeks differ, a setup cost incurs:
-var 0..maxSetupCost: totalSetupCost = sum([SetupCost[WeekType[w], WeekType[w+1]] | w in 1..weeks-1 ]);
+var 0..maxSetupCost: totalSetupCost = sum([SetupCost[FactorySetup[w], FactorySetup[w+1]] | w in 1..weeks-1 ]);
 
 %----Constraints----
 % Ensure that each spacecraft is built either before it is due or in the week it is due:
@@ -57,8 +57,8 @@ constraint forall(w in 1..weeks where Spacecraft[w] != 0)(DueWeek[Spacecraft[w]]
 % Ensure that each spacecraft is built (and not more than once):
 constraint global_cardinality(Spacecraft, 1..spacecrafts, [ 1 | s in 1..spacecrafts]);
 % Ensure that the type of spacecraft built in week w (if any) according to Spacecraft matches with the type according to WeekType.
-% Two-way channeling constraint 
-constraint forall(w in 1..weeks where Spacecraft[w] != 0)(Type[Spacecraft[w]] = WeekType[w]);
+% This is a two-way channeling constraint: 
+constraint forall(w in 1..weeks where Spacecraft[w] != 0)(Type[Spacecraft[w]] = FactorySetup[w]);
 
 %----Objective----
 % Minimize the total cost, consisting of totalStorageCost and totalSetupCost:
