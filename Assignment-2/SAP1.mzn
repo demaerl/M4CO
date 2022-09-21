@@ -57,7 +57,7 @@ constraint forall(w in 1..weeks where Spacecraft[w] != 0)(DueWeek[Spacecraft[w]]
 % Ensure that each spacecraft is built (and not more than once):
 constraint global_cardinality(Spacecraft, 1..spacecrafts, [ 1 | s in 1..spacecrafts]);
 % Ensure that the type of spacecraft built in week w (if any) according to Spacecraft matches with the type according to WeekType.
-% This is a two-way channeling constraint: 
+% This is a one-way channeling constraint from the array of variables Spacecraft to its redundant array of variables FactorySetup: 
 constraint forall(w in 1..weeks where Spacecraft[w] != 0)(Type[Spacecraft[w]] = FactorySetup[w]);
 
 %----Objective----
