@@ -41,12 +41,13 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 %----Decision variables----
 % Spacecraft[s] denotes in which week spacecraft s is built:
 array[1..spacecrafts] of var 1..weeks: Spacecraft;
-% Week[w] denotes which type of spacecraft to build in week w:
+% Week[w] denotes which type of spacecraft to build in week w.
+% Week is non-mutually redundant with the array of variables Spacecraft:
 array[1..weeks] of var 0..types: Week;
 
 % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
 var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Spacecraft[s]) * storageCost | s in 1..spacecrafts]);
-% 
+% If the types of spacecrafts built in two consecutive weeks differ, a setup cost incurs:
 var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[Week[w], Week[w+1]]| w in 1..weeks-1]);
 
 %----Constraints----
@@ -54,7 +55,8 @@ var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[Week[w], Week[w+1]]| w in 
 constraint all_different(Spacecraft);
 % Ensure that for each spacecraft s, s is assembled in a week before or in the due week:
 constraint forall(s in 1..spacecrafts)(Spacecraft[s] <= DueWeek[s]);
-% Ensure that for each spacecraft s, the type of s (Type[s]) matches up with the type that is built in the week in which s is built (Week[Spacecraft[s]]):
+% Ensure that for each spacecraft s, Type[s] matches with the type that is built in the week in which s is built (Week[Spacecraft[s]]).
+% This is a two-way channelling constraint:
 constraint forall(s in 1..spacecrafts)( Week[Spacecraft[s]] = Type[s]);
 
 %----Objective----
