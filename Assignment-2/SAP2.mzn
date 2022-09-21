@@ -43,12 +43,12 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 array[1..spacecrafts] of var 1..weeks: Week;
 % FactorySetup[w] denotes which type of spacecraft the factory is set up to build in week w.
 % FactorySetup is non-mutually redundant with the array of variables Week:
-array[1..weeks] of var 0..types: FactorySetup;
+array[1..weeks] of var 1..types: FactorySetup;
 
 % If a spacecraft is assembled before its due week, it will incur a storage cost (of amount storageCost) for every week that it is not due:
-var 0..maxStorageCost: totalStorageCost = sum([ (DueWeek[s] - Week[s]) * storageCost | s in 1..spacecrafts ]);
+var 0..maxStorageCost: totalStorageCost = sum([(DueWeek[s] - Week[s]) * storageCost | s in 1..spacecrafts]);
 % If the types of spacecrafts built in two consecutive weeks differ, a setup cost incurs:
-var 0..maxSetupCost: totalSetupCost = sum([ SetupCost[FactorySetup[w], FactorySetup[w+1]]| w in 1..weeks-1 ]);
+var 0..maxSetupCost: totalSetupCost = sum([SetupCost[FactorySetup[w], FactorySetup[w+1]]| w in 1..weeks-1]);
 
 %----Constraints----
 % Each spacecraft is built exactly once:
@@ -56,6 +56,7 @@ constraint all_different(Week);
 % Ensure that for each spacecraft s, s is assembled in a week before or in the due week:
 constraint forall(s in 1..spacecrafts)(Week[s] <= DueWeek[s]);
 % Ensure that for each spacecraft s, Type[s] matches with the type that the factory is set up to build for the week s is built.
+% This is a one-way channelling constraint from the array of variables Week to its redundant array of variables FactorySetup:
 constraint forall(s in 1..spacecrafts)(FactorySetup[Week[s]] = Type[s]);
 
 %----Objective----
