@@ -42,7 +42,7 @@ array[1..spacecrafts] of int: Type = [ t | t in 1..types, w in 1..weeks, amount 
 % Spacecraft[w] denotes which spacecraft (if any) to build in week w:
 % 0 is used as dummy value. Therefore, Spacecraft[w] = 0 denotes that no spacecraft is built in week w.
 array[1..weeks] of var 0..spacecrafts: Spacecraft;
-% FactorySetup[w] denotes which type of spacecraft to build in week w.
+% FactorySetup[w] denotes which type of spacecraft the factory is set up to build in week w.
 % FactorySetup is non-mutually redundant with the array of variables Spacecraft:
 array[1..weeks] of var 1..types: FactorySetup;
 % If a spacecraft is assembled before its due week, a storageCost for every week it is not due incurs.
