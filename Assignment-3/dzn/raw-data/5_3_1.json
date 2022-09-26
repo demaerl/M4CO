@@ -1,0 +1,10 @@
+{
+"map_width" : 600,
+"map_height" : 600,
+"scooters" : [
+{ "x":204, "y" : 266, "company_value":31, "service_value":81 },{ "x":304, "y" : 352, "company_value":46, "service_value":88 },{ "x":390, "y" : 479, "company_value":31, "service_value":97 }
+],
+"employees" : [
+{ "current_x":432, "current_y" : 544, "home_x":223, "home_y" : 230, "min_num_scooters":2, "max_num_scooters":8,"max_dist":1529 }
+]
+}

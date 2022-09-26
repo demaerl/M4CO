@@ -1,0 +1,10 @@
+{
+"map_width" : 600,
+"map_height" : 600,
+"scooters" : [
+{ "x":186, "y" : 431, "company_value":24, "service_value":95 },{ "x":192, "y" : 347, "company_value":43, "service_value":82 },{ "x":357, "y" : 285, "company_value":41, "service_value":87 },{ "x":504, "y" : 323, "company_value":26, "service_value":95 },{ "x":400, "y" : 479, "company_value":15, "service_value":92 },{ "x":295, "y" : 327, "company_value":8, "service_value":87 }
+],
+"employees" : [
+{ "current_x":122, "current_y" : 203, "home_x":101, "home_y" : 147, "min_num_scooters":3, "max_num_scooters":10,"max_dist":892 },{ "current_x":49, "current_y" : 75, "home_x":319, "home_y" : 145, "min_num_scooters":3, "max_num_scooters":9,"max_dist":891 },{ "current_x":146, "current_y" : 201, "home_x":375, "home_y" : 391, "min_num_scooters":3, "max_num_scooters":11,"max_dist":1046 }
+]
+}

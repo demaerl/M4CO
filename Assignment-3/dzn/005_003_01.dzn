@@ -1,0 +1,17 @@
+nScooters 	= 3;
+nEmployees 	= 1;
+dummy 	= 2;
+TravelTime 	= [|0, 132, 283, 360, 41
+|132, 0, 154, 231, 147
+|283, 154, 0, 0, 0
+|360, 231, 0, 0, 0
+|41, 147, 0, 0, 0
+|];
+Priority = [31, 46, 31];
+Payment = [81, 88, 97];
+MinNumScooters = [2];
+MaxNumScooters = [8];
+MaxTime = [1529];
+alpha = 7;
+beta = 1;
+gamma = 13;

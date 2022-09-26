@@ -1,0 +1,10 @@
+{
+"map_width" : 600,
+"map_height" : 600,
+"scooters" : [
+{ "x":259, "y" : 424, "company_value":18, "service_value":66 },{ "x":241, "y" : 393, "company_value":43, "service_value":66 },{ "x":214, "y" : 349, "company_value":24, "service_value":96 },{ "x":201, "y" : 312, "company_value":16, "service_value":71 },{ "x":177, "y" : 258, "company_value":19, "service_value":60 },{ "x":189, "y" : 220, "company_value":35, "service_value":84 },{ "x":258, "y" : 196, "company_value":37, "service_value":77 },{ "x":300, "y" : 206, "company_value":16, "service_value":92 },{ "x":318, "y" : 247, "company_value":22, "service_value":75 },{ "x":346, "y" : 230, "company_value":26, "service_value":57 },{ "x":390, "y" : 208, "company_value":47, "service_value":64 },{ "x":429, "y" : 214, "company_value":34, "service_value":67 },{ "x":420, "y" : 271, "company_value":10, "service_value":77 },{ "x":394, "y" : 319, "company_value":6, "service_value":61 },{ "x":353, "y" : 361, "company_value":8, "service_value":80 },{ "x":327, "y" : 403, "company_value":44, "service_value":83 },{ "x":283, "y" : 458, "company_value":15, "service_value":63 }
+],
+"employees" : [
+{ "current_x":471, "current_y" : 39, "home_x":170, "home_y" : 142, "min_num_scooters":4, "max_num_scooters":6,"max_dist":1014 },{ "current_x":568, "current_y" : 250, "home_x":385, "home_y" : 511, "min_num_scooters":3, "max_num_scooters":13,"max_dist":1465 },{ "current_x":230, "current_y" : 313, "home_x":152, "home_y" : 466, "min_num_scooters":4, "max_num_scooters":12,"max_dist":1206 }
+]
+}
