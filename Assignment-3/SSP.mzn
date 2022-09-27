@@ -59,7 +59,8 @@ int: gamma;  % weight in the objective function of the total priority loss
 array[Nodes] of var Nodes: Succ;  % Succ[n] is the successor node of node n
 constraint subcircuit(Succ) :: domain;
 
-constraint ...;  % ...
+% Ensure that the successor of each employee's end node is the start node of the circularly next employee:
+constraint forall(i in 1..nEmployees)(exists(j in 1..nEmployees)(Succ[EndNode[i]] = StartNode[j]));
 
 %% ------ Which node is visited by which employee (according to the tour) ------
 
