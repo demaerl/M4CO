@@ -97,7 +97,7 @@ constraint forall(e in Employees)(NumServiced[e] in MinNumScooters[e]..MaxNumSco
 array[Nodes] of var 0..sum(TravelTime): AccumulatedTravelTime;  % non-mutually redundant with Succ
 
 % [specify whether 1-way or 2-way] Channelling constraint:
-% For two successive nodes on an employees route, the difference of accumulated travel time of node n and its sucessor n' corresponds to the travel time between n and n':
+% For two successive nodes on an employees route, the difference of accumulated travel time of node n1 and its sucessor n2 corresponds to the travel time between n1 and n2:
 constraint forall(n in Nodes where VisitedBy[n] = VisitedBy[Succ[n]] /\ n != EndNode[VisitedBy[n]])(AccumulatedTravelTime[n] + TravelTime[n, Succ[n]] = AccumulatedTravelTime[Succ[n]]);
 % Each start node has an accumulated travel time of 0:
 constraint forall(n in StartNode)(AccumulatedTravelTime[n] = 0);
@@ -109,9 +109,7 @@ array[Employees] of var 0..sum(TravelTime): Overtime;  % non-mutually redundant 
 % Overtime[e] is either 0 or the difference between the actual (accumulated) travel time and the preferred travel time of employee e:
 constraint forall(e in Employees)(Overtime[e] = max(AccumulatedTravelTime[EndNode[e]] - MaxTime[e],0));
 
-var 0..sum(TravelTime): totalOvertime;  % total overtime of all the employees
-
-constraint totalOvertime = sum(Overtime);
+var 0..sum(TravelTime): totalOvertime = sum(Overtime);  % total overtime of all the employees
 
 % constraint ...;  % ...
 
@@ -122,11 +120,11 @@ array[EmployeesAndDummy] of var 0..sum(Payment): EmployeePayment;  % non-mutuall
 % Note that we only include the dummy employee here so that the indexing matches the domain of VisitedBy (in case this were useful for a global constraint).
 
 % [specify whether 1-way or 2-way] Channelling constraint: ...:
-constraint forall(e in Employees)(EmployeePayment[e] = sum(s in Scooters where VisitedBy[s] = e)(Payment[s]));
+%constraint forall(e in Employees)(EmployeePayment[e] = sum(s in Scooters where VisitedBy[s] = e)(Payment[s]));
 % TODO: Ask in help session about implicit reification
 constraint forall(e in Employees)(sum(s in Scooters)((VisitedBy[s] = e)*Payment[s]) = EmployeePayment[e]);
 
-var 0..sum(Payment): totalPayment = sum(EmployeePayment);  % total payment that all the employees receive
+var 0..sum(Payment): totalPayment = sum(EmployeePayment[Employees]);  % total payment that all the employees receive
 
 %constraint ...;  % ...
 
