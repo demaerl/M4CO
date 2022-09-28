@@ -98,6 +98,7 @@ array[Nodes] of var 0..sum(TravelTime): AccumulatedTravelTime;  % non-mutually r
 
 % [specify whether 1-way or 2-way] Channelling constraint:
 % For two successive nodes on an employees route, the difference of accumulated travel time of node n1 and its sucessor n2 corresponds to the travel time between n1 and n2:
+% TODO: reformulate according to checklist
 constraint forall(n in Nodes where VisitedBy[n] = VisitedBy[Succ[n]] /\ n != EndNode[VisitedBy[n]])(AccumulatedTravelTime[n] + TravelTime[n, Succ[n]] = AccumulatedTravelTime[Succ[n]]);
 % Each start node has an accumulated travel time of 0:
 constraint forall(n in StartNode)(AccumulatedTravelTime[n] = 0);
