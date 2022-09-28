@@ -86,7 +86,7 @@ constraint forall(s in Scooters)(Succ[s] = s <-> VisitedBy[s] = dummy);
 array[Employees] of var 0..nScooters: NumServiced;  % non-mutually redundant with VisitedBy
 
 % [specify whether 1-way or 2-way] Channelling constraint: NumServiced[e] is the number of scooters serviced by e:
-constraint global_cardinality(VisitedBy, Employees, NumServiced);
+constraint global_cardinality(VisitedBy[Scooters], Employees, NumServiced);
 
 % Each employee e services either 0 or from MinNumScooters[e] to MaxNumScooters[e] scooters:
 constraint forall(e in Employees)(NumServiced[e] in MinNumScooters[e]..MaxNumScooters[e] union {0});
@@ -98,7 +98,7 @@ array[Nodes] of var 0..sum(TravelTime): AccumulatedTravelTime;  % non-mutually r
 
 % [specify whether 1-way or 2-way] Channelling constraint:
 % For two successive nodes on an employees route, the difference of accumulated travel time of node n and its sucessor n' corresponds to the travel time between n and n':
-constraint forall(n in Nodes where VisitedBy[n] = VisitedBy[Succ[n]])(AccumulatedTravelTime[n] + TravelTime[n, Succ[n]] = AccumulatedTravelTime[Succ[n]]);
+constraint forall(n in Nodes where VisitedBy[n] = VisitedBy[Succ[n]] /\ n != EndNode[VisitedBy[n]])(AccumulatedTravelTime[n] + TravelTime[n, Succ[n]] = AccumulatedTravelTime[Succ[n]]);
 % Each start node has an accumulated travel time of 0:
 constraint forall(n in StartNode)(AccumulatedTravelTime[n] = 0);
 
@@ -107,9 +107,11 @@ array[Employees] of var 0..sum(TravelTime): Overtime;  % non-mutually redundant 
 
 % [specify whether 1-way or 2-way] Channelling constraint: ...:
 % Overtime[e] is either 0 or the difference between the actual (accumulated) travel time and the preferred travel time of employee e:
-constraint forall(e in Employees)(Overtime[e] = max(AccumulatedTravelTime[e] - MaxTime[e],0));
+constraint forall(e in Employees)(Overtime[e] = max(AccumulatedTravelTime[EndNode[e]] - MaxTime[e],0));
 
 var 0..sum(TravelTime): totalOvertime;  % total overtime of all the employees
+
+constraint totalOvertime = sum(Overtime);
 
 % constraint ...;  % ...
 
@@ -120,7 +122,7 @@ array[EmployeesAndDummy] of var 0..sum(Payment): EmployeePayment;  % non-mutuall
 % Note that we only include the dummy employee here so that the indexing matches the domain of VisitedBy (in case this were useful for a global constraint).
 
 % [specify whether 1-way or 2-way] Channelling constraint: ...:
-%constraint forall(e in Employees)(EmployeePayment[e] = sum(s in Scooters where VisitedBy[s] = e)(Payment[s]));
+constraint forall(e in Employees)(EmployeePayment[e] = sum(s in Scooters where VisitedBy[s] = e)(Payment[s]));
 % TODO: Ask in help session about implicit reification
 constraint forall(e in Employees)(sum(s in Scooters)((VisitedBy[s] = e)*Payment[s]) = EmployeePayment[e]);
 
