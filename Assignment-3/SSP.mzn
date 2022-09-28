@@ -60,7 +60,7 @@ array[Nodes] of var Nodes: Succ;  % Succ[n] is the successor node of node n
 constraint subcircuit(Succ) :: domain;
 
 % Ensure that the successor of each employee's end node is the start node of the circularly next employee:
-constraint forall(i in 1..nEmployees)(exists(j in 1..nEmployees)(Succ[EndNode[i]] = StartNode[j]));
+constraint global_cardinality([Succ[EndNode[e]] | e in Employees], StartNode, [1 | e in Employees]);
 
 %% ------ Which node is visited by which employee (according to the tour) ------
 
@@ -68,16 +68,17 @@ constraint forall(i in 1..nEmployees)(exists(j in 1..nEmployees)(Succ[EndNode[i]
 array[Nodes] of var EmployeesAndDummy: VisitedBy;  % non-mutually redundant with Succ
 
 % [specify whether 1-way or 2-way] Channelling constraint: each StartNode[e] is visited by e, and each EndNode[e] is visited by e:
-constraint ...;
+constraint forall(e in Employees)(VisitedBy[StartNode[e]] = e /\ VisitedBy[EndNode[e]] = e);
 
 % [specify whether 1-way or 2-way] Channelling constraint: the successor of each scooter node n is visited by the same employee as n, even if it is the end node:
-constraint ...;
+constraint forall(s in Scooters)(VisitedBy[s] = VisitedBy[Succ[s]]);
 
 % [specify whether 1-way or 2-way] Channelling constraint: the successor of each start node n is visited by that employee n, even if it is the end node:
-constraint ...;
+constraint forall(n in StartNode)(VisitedBy[n] = VisitedBy[Succ[n]]);
 
 % [specify whether 1-way or 2-way] Channelling constraint: the successor of each scooter node n is n if and only if node n is visited by the dummy employee:
-constraint ...;
+% TODO: reformulate according to checklist
+constraint forall(s in Scooters)(Succ[s] = s <-> VisitedBy[s] = dummy);
 
 %% ------ Number of scooters serviced by each employee ------
 
@@ -85,28 +86,32 @@ constraint ...;
 array[Employees] of var 0..nScooters: NumServiced;  % non-mutually redundant with VisitedBy
 
 % [specify whether 1-way or 2-way] Channelling constraint: NumServiced[e] is the number of scooters serviced by e:
-constraint ...;
+constraint global_cardinality(VisitedBy, Employees, NumServiced);
 
 % Each employee e services either 0 or from MinNumScooters[e] to MaxNumScooters[e] scooters:
-constraint ...;
+constraint forall(e in Employees)(NumServiced[e] in MinNumScooters[e]..MaxNumScooters[e] union {0});
 
 %% ------ Overtime cost ------
 
 % AccumulatedTravelTime[n] = travel time accumulated when arriving at n since its employee e departed from the start node of e:
 array[Nodes] of var 0..sum(TravelTime): AccumulatedTravelTime;  % non-mutually redundant with Succ
 
-% [specify whether 1-way or 2-way] Channelling constraint: ...:
-constraint ...;
+% [specify whether 1-way or 2-way] Channelling constraint:
+% For two successive nodes on an employees route, the difference of accumulated travel time of node n and its sucessor n' corresponds to the travel time between n and n':
+constraint forall(n in Nodes where VisitedBy[n] = VisitedBy[Succ[n]])(AccumulatedTravelTime[n] + TravelTime[n, Succ[n]] = AccumulatedTravelTime[Succ[n]]);
+% Each start node has an accumulated travel time of 0:
+constraint forall(n in StartNode)(AccumulatedTravelTime[n] = 0);
 
 % Overtime[e] = amount of travel time of e that exceeds MaxTime[e]:
 array[Employees] of var 0..sum(TravelTime): Overtime;  % non-mutually redundant with AccumulatedTravelTime
 
 % [specify whether 1-way or 2-way] Channelling constraint: ...:
-constraint ...;
+% Overtime[e] is either 0 or the difference between the actual (accumulated) travel time and the preferred travel time of employee e:
+constraint forall(e in Employees)(Overtime[e] = max(AccumulatedTravelTime[e] - MaxTime[e],0));
 
 var 0..sum(TravelTime): totalOvertime;  % total overtime of all the employees
 
-constraint ...;  % ...
+% constraint ...;  % ...
 
 %% ------ Employee payment ------
 
@@ -115,17 +120,19 @@ array[EmployeesAndDummy] of var 0..sum(Payment): EmployeePayment;  % non-mutuall
 % Note that we only include the dummy employee here so that the indexing matches the domain of VisitedBy (in case this were useful for a global constraint).
 
 % [specify whether 1-way or 2-way] Channelling constraint: ...:
-constraint ...;
+%constraint forall(e in Employees)(EmployeePayment[e] = sum(s in Scooters where VisitedBy[s] = e)(Payment[s]));
+% TODO: Ask in help session about implicit reification
+constraint forall(e in Employees)(sum(s in Scooters)((VisitedBy[s] = e)*Payment[s]) = EmployeePayment[e]);
 
-var 0..sum(Payment): totalPayment;  % total payment that all the employees receive
+var 0..sum(Payment): totalPayment = sum(EmployeePayment);  % total payment that all the employees receive
 
-constraint ...;  % ...
+%constraint ...;  % ...
 
 %% ------ Priority loss ------
 
 var 0..sum(Priority): totalPriorityLoss;  % total priority of all scooters not serviced by anyone
 
-constraint ...;  % ...
+constraint sum(s in Scooters where VisitedBy[s] = dummy)(Priority[s]) = totalPriorityLoss;  % ...
 
 %% ------ Objective ------
 
