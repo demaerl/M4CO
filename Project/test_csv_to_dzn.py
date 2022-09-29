@@ -10,6 +10,7 @@ def read_csv(filename: str):
         line_count = 0
         for row in csv_reader:
             if line_count == 0:
+                data['companies'] = len(row)
                 data["Company"] = row
             else:
                 data["Preference"].append(row)
@@ -18,12 +19,13 @@ def read_csv(filename: str):
                 # else:
                 #     data["Preference"] = row
             line_count += 1  
+        data['students'] = line_count - 1
 
     return data          
 
 def main():
     location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    postfix = 'test'
+    postfix = 'test2'
     filename_read = os.path.join(location, 'data', "".join([postfix, '.csv']))
     filename_write = os.path.join(location, 'data', "".join([postfix, '.dzn']))
     data = read_csv(filename_read)
