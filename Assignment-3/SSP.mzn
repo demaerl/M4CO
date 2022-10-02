@@ -67,16 +67,20 @@ constraint global_cardinality([Succ[EndNode[e]] | e in Employees], StartNode, [1
 % Each node is visited by an employee, or by the dummy employee if nobody visits it:
 array[Nodes] of var EmployeesAndDummy: VisitedBy;  % non-mutually redundant with Succ
 
-% [specify whether 1-way or 2-way] Channelling constraint: each StartNode[e] is visited by e, and each EndNode[e] is visited by e:
+% 1-way channelling constraint from Succ to its redundant array of vars VisitedBy:
+% Each StartNode[e] is visited by e, and each EndNode[e] is visited by e:
 constraint forall(e in Employees)(VisitedBy[StartNode[e]] = e /\ VisitedBy[EndNode[e]] = e);
 
-% [specify whether 1-way or 2-way] Channelling constraint: the successor of each scooter node n is visited by the same employee as n, even if it is the end node:
+% 1-way channelling constraint from Succ to its redundant array of vars VisitedBy:
+% The successor of each scooter node n is visited by the same employee as n, even if it is the end node:
 constraint forall(s in Scooters)(VisitedBy[s] = VisitedBy[Succ[s]]);
 
-% [specify whether 1-way or 2-way] Channelling constraint: the successor of each start node n is visited by that employee n, even if it is the end node:
+% 1-way channelling constraint from Succ to its redundant array of vars VisitedBy:
+% The successor of each start node n is visited by that employee n, even if it is the end node:
 constraint forall(n in StartNode)(VisitedBy[n] = VisitedBy[Succ[n]]);
 
-% [specify whether 1-way or 2-way] Channelling constraint: the successor of each scooter node n is n if and only if node n is visited by the dummy employee:
+% 2-way channelling constraint between Succ and its redundant array of vars VisitedBy:
+% The successor of each scooter node n is n if and only if node n is visited by the dummy employee:
 % TODO: reformulate according to checklist
 constraint forall(s in Scooters)(Succ[s] = s <-> VisitedBy[s] = dummy);
 
@@ -85,7 +89,8 @@ constraint forall(s in Scooters)(Succ[s] = s <-> VisitedBy[s] = dummy);
 % NumServiced[e] = number of scooters serviced by e:
 array[Employees] of var 0..nScooters: NumServiced;  % non-mutually redundant with VisitedBy
 
-% [specify whether 1-way or 2-way] Channelling constraint: NumServiced[e] is the number of scooters serviced by e:
+% 1-way channelling constraint from VisitedBy to its redundant array of vars NumServiced:
+% NumServiced[e] is the number of scooters serviced by e:
 constraint global_cardinality(VisitedBy[Scooters], Employees, NumServiced);
 
 % Each employee e services either 0 or from MinNumScooters[e] to MaxNumScooters[e] scooters:
@@ -96,8 +101,8 @@ constraint forall(e in Employees)(NumServiced[e] in MinNumScooters[e]..MaxNumSco
 % AccumulatedTravelTime[n] = travel time accumulated when arriving at n since its employee e departed from the start node of e:
 array[Nodes] of var 0..sum(TravelTime): AccumulatedTravelTime;  % non-mutually redundant with Succ
 
-% [specify whether 1-way or 2-way] Channelling constraint:
-% For two successive nodes on an employees route, the difference of accumulated travel time of node n1 and its sucessor n2 corresponds to the travel time between n1 and n2:
+% 1-way channelling constraint from Succ to its redundant array of vars AccumulatedTravelTime:
+% For two successive nodes n1 and n2 on an employee's route, the difference of accumulated travel time of node n1 and n2 corresponds to the travel time between n1 and n2:
 % TODO: reformulate according to checklist
 constraint forall(n in Nodes where VisitedBy[n] = VisitedBy[Succ[n]] /\ n != EndNode[VisitedBy[n]])(AccumulatedTravelTime[n] + TravelTime[n, Succ[n]] = AccumulatedTravelTime[Succ[n]]);
 % Each start node has an accumulated travel time of 0:
@@ -106,13 +111,11 @@ constraint forall(n in StartNode)(AccumulatedTravelTime[n] = 0);
 % Overtime[e] = amount of travel time of e that exceeds MaxTime[e]:
 array[Employees] of var 0..sum(TravelTime): Overtime;  % non-mutually redundant with AccumulatedTravelTime
 
-% [specify whether 1-way or 2-way] Channelling constraint: ...:
+% 1-way channelling constraint from AccumulatedTravelTime to its redundant array of vars Overtime:
 % Overtime[e] is either 0 or the difference between the actual (accumulated) travel time and the preferred travel time of employee e:
 constraint forall(e in Employees)(Overtime[e] = max(AccumulatedTravelTime[EndNode[e]] - MaxTime[e],0));
 
 var 0..sum(TravelTime): totalOvertime = sum(Overtime);  % total overtime of all the employees
-
-% constraint ...;  % ...
 
 %% ------ Employee payment ------
 
@@ -120,9 +123,9 @@ var 0..sum(TravelTime): totalOvertime = sum(Overtime);  % total overtime of all 
 array[EmployeesAndDummy] of var 0..sum(Payment): EmployeePayment;  % non-mutually redundant with VisitedBy
 % Note that we only include the dummy employee here so that the indexing matches the domain of VisitedBy (in case this were useful for a global constraint).
 
-% [specify whether 1-way or 2-way] Channelling constraint: ...:
-%constraint forall(e in Employees)(EmployeePayment[e] = sum(s in Scooters where VisitedBy[s] = e)(Payment[s]));
-% TODO: Ask in help session about implicit reification
+% 1-way channelling constraint from VisitedBy to its redundant array of vars EmployeePayment:
+% Ensure that each employee (except for the dummy employee) gets payment for each scooter that the employee services:
+% TODO: Find reformulation according to checklist (reification)
 constraint forall(e in Employees)(sum(s in Scooters)((VisitedBy[s] = e)*Payment[s]) = EmployeePayment[e]);
 
 var 0..sum(Payment): totalPayment = sum(EmployeePayment[Employees]);  % total payment that all the employees receive
@@ -133,7 +136,8 @@ var 0..sum(Payment): totalPayment = sum(EmployeePayment[Employees]);  % total pa
 
 var 0..sum(Priority): totalPriorityLoss;  % total priority of all scooters not serviced by anyone
 
-constraint sum(s in Scooters where VisitedBy[s] = dummy)(Priority[s]) = totalPriorityLoss;  % ...
+% The total priority loss consists of the sum of the priorities of all scooters that are visited by the dummy employee:
+constraint sum(s in Scooters where VisitedBy[s] = dummy)(Priority[s]) = totalPriorityLoss;
 
 %% ------ Objective ------
 
