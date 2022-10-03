@@ -57,7 +57,7 @@ int: gamma;  % weight in the objective function of the total priority loss
 %% ------ Giant-tour formulation ------
 
 array[Nodes] of var Nodes: Succ;  % Succ[n] is the successor node of node n
-constraint subcircuit(Succ) :: domain;
+constraint subcircuit(Succ) :: bounds_propagation;
 
 % Ensure that the successor of each employee's end node is the start node of the circularly next employee:
 constraint global_cardinality([Succ[EndNode[e]] | e in Employees], StartNode, [1 | e in Employees]);
