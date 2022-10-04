@@ -67,6 +67,7 @@ constraint global_cardinality([Succ[EndNode[e]] | e in Employees], StartNode, [1
 % Each node is visited by an employee, or by the dummy employee if nobody visits it:
 array[Nodes] of var EmployeesAndDummy: VisitedBy;  % non-mutually redundant with Succ
 
+% TODO: fix channelling classification
 % 1-way channelling constraint from Succ to its redundant array of vars VisitedBy:
 % Each StartNode[e] is visited by e, and each EndNode[e] is visited by e:
 constraint forall(e in Employees)(VisitedBy[StartNode[e]] = e /\ VisitedBy[EndNode[e]] = e);
@@ -130,8 +131,6 @@ constraint forall(e in Employees)(sum(s in Scooters)((VisitedBy[s] = e)*Payment[
 
 var 0..sum(Payment): totalPayment = sum(EmployeePayment[Employees]);  % total payment that all the employees receive
 
-%constraint ...;  % ...
-
 %% ------ Priority loss ------
 
 var 0..sum(Priority): totalPriorityLoss;  % total priority of all scooters not serviced by anyone
@@ -148,5 +147,9 @@ constraint obj = alpha*totalOvertime - beta*totalPayment + gamma*totalPriorityLo
 solve
 % :: restart_constant(%rho%)               % only for Task B: use only together with relax_and_reconstruct
 % :: relax_and_reconstruct(Succ, %sigma%)  % only for Task B: requires including "gecode.mzn", but it will then only run on Gecode
-% :: seq_search([ ... ])
+:: seq_search([
+    int_search(NumServiced, first_fail, indomain_median),
+    int_search(Overtime, first_fail,indomain_min)
+])
+% :: int_search(Overtime, input_order, indomain_min)
 minimize obj;
