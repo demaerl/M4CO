@@ -1,4 +1,4 @@
-/*0
+/*
  *
  * Copyright: Gustav.Bjordal@it.uu.se and Pierre.Flener@it.uu.se, 2022.
  *
@@ -25,8 +25,8 @@ int: nEmployees;  % number of employees
 int: dummy;       % dummy employee        
 constraint assert(not (dummy in 1..nEmployees), "Dummy is not an employee");
 int: nNodes = nScooters + 2*nEmployees;  % number of nodes: each employee has start and end locations
-int: rho;
-int: sigma;
+int: rho = 4000;
+int: sigma = 80;
 
 % Some of the following sets may be unnecessary and you may want to add more sets:
 set of int: Scooters = 1..nScooters;
