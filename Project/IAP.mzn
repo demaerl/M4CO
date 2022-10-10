@@ -54,6 +54,8 @@ array[1..students] of var 0..6: Regret = [ AssignedPreference[s] - sum([ SortedP
 % Sort preferences of students in ascending order:
 constraint forall(s in 1..students)(sort(Preference[s,..], SortedPreference[s,..]));
 
+var 0..6: maxRegret = max(Regret);
+
 
 %% ------ Day 2: Company disappointment ------
 
