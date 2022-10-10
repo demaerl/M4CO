@@ -1,6 +1,11 @@
 include "globals.mzn";
 
 %%% ------ Parameters and derived parameters ------
+% weights for the objective function
+int: alpha = students * 15 * beta;
+int: beta = sum(Disappointment);
+int: gamma = 1;
+
 % enum of companies:
 enum Company = {AIMMS, SAS, Keelvar, Microsoft, Google, IBM, Cadence, Quintiq, Siemens, Cosling, COSYTEC, LocalSolver, Nside, UTRCI, Zoomer};
 int: companies; % #of companies
@@ -46,7 +51,7 @@ array[1..students, 1..companies] of var 1..5: SortedPreference;
 array[1..students] of var 0..9: AssignedPreference = [ sum([Interview[s,c]*Preference[s,c] | c in 1..companies]) | s in 1..students];
 % Regret[s] denotes the regret, i.e. the difference between best indicated preferences and assigned preferences:
 array[1..students] of var 0..6: Regret = [ AssignedPreference[s] - sum([ SortedPreference[s,i] | i in 1..3 where SortedPreference[s,i] < 4]) | s in 1..students];
-
+% Sort preferences of students in ascending order:
 constraint forall(s in 1..students)(sort(Preference[s,..], SortedPreference[s,..]));
 
 
@@ -61,14 +66,16 @@ constraint forall(c in 1..companies where sum(Interview[..,c]) = 0)(IncurredDisa
 % Calculate the total disappointment:
 var 0..sum(Disappointment): totalDisappointment = sum(IncurredDisappointment);
 
+var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalDisappointment;
+
 
 %----Objective----
-% minimize max regret:
-solve minimize max(Regret);
+% Day 3: minimize max regret:, total preference cost and total disappointment:
+solve minimize obj;
 % Day 2: secondary objective:
 %solve minimize totalPreferenceCost;
 
 %----Output----
-%output [show(Regret), "\n"];
-%output [show(AssignedPreference), "\n"];
-%output [show(sum(Interview))];
+output [show(max(Regret)), "\n"];
+output [show(totalPreferenceCost), "\n"];
+output [show(totalDisappointment)];
