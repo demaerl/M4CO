@@ -41,7 +41,7 @@ constraint forall(s in 1..students, c in 1..companies where Interview[s,c] = 1)(
 %% ------ Preference cost ------
 
 % Total preference cost:
-var 3*students..15*students: totalPreferenceCost = sum([Preference[s,c] * Interview[s,c] | s in 1..students, c in 1..companies]);
+var 3*students..15*students: totalPreferenceCost :: add_to_output= sum([Preference[s,c] * Interview[s,c] | s in 1..students, c in 1..companies]);
 
 %% ------ Day 2: Student regret ------
 
@@ -54,7 +54,7 @@ array[1..students] of var 0..6: Regret = [ AssignedPreference[s] - sum([ SortedP
 % Sort preferences of students in ascending order:
 constraint forall(s in 1..students)(sort(Preference[s,..], SortedPreference[s,..]));
 
-var 0..6: maxRegret = max(Regret);
+var 0..6: maxRegret :: add_to_output = max(Regret);
 
 
 %% ------ Day 2: Company disappointment ------
@@ -66,7 +66,7 @@ array[1..companies] of var 0..max(Disappointment): IncurredDisappointment;
 constraint forall(c in 1..companies where sum(Interview[..,c]) = 0)(IncurredDisappointment[c] = Disappointment[c]);
 
 % Calculate the total disappointment:
-var 0..sum(Disappointment): totalDisappointment = sum(IncurredDisappointment);
+var 0..sum(Disappointment): totalDisappointment :: add_to_output = sum(IncurredDisappointment);
 
 var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalDisappointment;
 
