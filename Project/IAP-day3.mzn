@@ -91,7 +91,7 @@ array[1..slots, 1..suites] of var 0..companies: CompanySchedule;
 % Schedule[sl, d, su, st] denotes with which company (if any) student st has an interview in slot sl on day d in suite su:
 array[1..slots, 1..suites, 1..students] of var 0..companies: Schedule;
 % Ensure that interviews are scheduled according to availability of students as indicated in Slot:
- constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl, su, st] != 0)(count(Slot[..,st], sl) = 1);
+constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl, su, st] != 0)(count(Slot[..,st], sl) = 1);
 % 1-way channelling constraint from Schedule to StudentSchedule:
 constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl,su, st] != 0)(StudentSchedule[sl, su] = st);
 % 1-way channelling constraint from Schedule to CompanySchedule:
