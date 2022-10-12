@@ -80,14 +80,11 @@ var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalD
 %% ------ Day 3------
 
 % TODO: Decide if redundant variables and/or channelling
-% TODO: Replace slots, days with slots of range 1..20
 
 % StudentSchedule[sl, d , su] denotes the student that has an interview in slot sl, on day d, and in suite su:
-% Non-mutually redundant with Schedule:
-array[1..slots, 1..suites] of var 0..students: StudentSchedule;
+array[1..slots, 1..suites] of var 0..students: StudentSchedule; % non-mutually redundant with Schedule:
 % CompanySchedule[sl, d , su] denotes the company that has an interview in slot sl, on day d, and in suite su:
-% Non-mutually redundant with Schedule:
-array[1..slots, 1..suites] of var 0..companies: CompanySchedule;
+array[1..slots, 1..suites] of var 0..companies: CompanySchedule; % non-mutually redundant with Schedule:
 % Schedule[sl, d, su, st] denotes with which company (if any) student st has an interview in slot sl on day d in suite su:
 array[1..slots, 1..suites, 1..students] of var 0..companies: Schedule;
 % Ensure that interviews are scheduled according to availability of students as indicated in Slot:
@@ -108,9 +105,9 @@ constraint forall(st in 1..students, c in 1..companies)(Interview[st, c] = 1 <->
 % constraint forall(c in 1..companies)(global_cardinality(global_cardinality(), 1..students, Interview[..,c]))
 
 % Ensure that each student only has at most one interview during one slot:
-constraint forall(sl in 1..slots)(global_cardinality_low_up(StudentSchedule[sl, ..], 0..students, [0 | i in 1..students], [1 | i in 1..students]));
+constraint forall(sl in 1..slots)(global_cardinality_low_up(StudentSchedule[sl, ..], 1..students, [0 | i in 1..students], [1 | i in 1..students]));
 % Ensure that each company has up to two interviews during one slot:
-constraint forall(sl in 1..slots)(global_cardinality_low_up(CompanySchedule[sl, ..], 0..companies, [0 | i in 1..companies], [2 | i in 1..companies]));
+constraint forall(sl in 1..slots)(global_cardinality_low_up(CompanySchedule[sl, ..], 1..companies, [0 | i in 1..companies], [2 | i in 1..companies]));
 
 constraint maxRegret = 1;
 constraint totalDisappointment = 0;
