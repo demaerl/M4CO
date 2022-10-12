@@ -12,7 +12,7 @@ int: companies; % #of companies
 int: students; % #of students
 int: days = 5;
 int: suites = 12;
-int: slots = 4;
+int: slots = 20;
 % Capacity[c] denotes the interview capacity of company c:
 %array[1..companies] of int: Capacity;
 % Preference[s, c] is the preference of student s to have interview with company c:
@@ -84,33 +84,33 @@ var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalD
 
 % StudentSchedule[sl, d , su] denotes the student that has an interview in slot sl, on day d, and in suite su:
 % Non-mutually redundant with Schedule:
-array[1..slots, 1..days, 1..suites] of var 0..students: StudentSchedule;
+array[1..slots, 1..suites] of var 0..students: StudentSchedule;
 % CompanySchedule[sl, d , su] denotes the company that has an interview in slot sl, on day d, and in suite su:
 % Non-mutually redundant with Schedule:
-array[1..slots, 1..days, 1..suites] of var 0..companies: CompanySchedule;
+array[1..slots, 1..suites] of var 0..companies: CompanySchedule;
 % Schedule[sl, d, su, st] denotes with which company (if any) student st has an interview in slot sl on day d in suite su:
-array[1..slots, 1..days, 1..suites, 1..students] of var 0..companies: Schedule;
+array[1..slots, 1..suites, 1..students] of var 0..companies: Schedule;
 % Ensure that interviews are scheduled according to availability of students as indicated in Slot:
-%constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl, su, st] != 0)(count(Slot[..,st], sl) = 1);
+ constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl, su, st] != 0)(count(Slot[..,st], sl) = 1);
 % 1-way channelling constraint from Schedule to StudentSchedule:
-constraint forall(sl in 1..slots, d in 1..days, su in 1..suites, st in 1..students where Schedule[sl, d, su, st] != 0)(StudentSchedule[sl, d, su] = st);
+constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl,su, st] != 0)(StudentSchedule[sl, su] = st);
 % 1-way channelling constraint from Schedule to CompanySchedule:
-constraint forall(sl in 1..slots, d in 1..days, su in 1..suites, st in 1..students where Schedule[sl, d, su, st] != 0)(CompanySchedule[sl, d, su] = Schedule[sl, d, su, st]);
+constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl, su, st] != 0)(CompanySchedule[sl, su] = Schedule[sl, su, st]);
 % If no student has an interview in slot sl, on day d, and in suite su, then no company has an interview in slot sl, on day d, and in suite su:
 % constraint forall(sl in 1..slots, d in 1..days, su in 1..suites)(StudentSchedule[sl, d, su] = 0 <-> CompanySchedule[sl, d, su] = 0);
 % Ensure that at most one interview is held in each suite during one slot:
-%constraint forall(sl in 1..slots, su in 1..suites)(count(Schedule[sl, su,..], 0) >= students-1);
+constraint forall(sl in 1..slots, su in 1..suites)(count(Schedule[sl, su,..], 0) >= students-1);
 % Ensure that for each slot sl in the schedule, the company and student in suite su on day d have an interview (if any) scheduled according to Interview:
-constraint forall(sl in 1..slots, d in 1..days, su in 1..suites where StudentSchedule[sl, d, su] != 0)(Interview[StudentSchedule[sl, d, su], CompanySchedule[sl, d, su]] = 1);
+constraint forall(sl in 1..slots, d in 1..days, su in 1..suites where StudentSchedule[sl, su] != 0)(Interview[StudentSchedule[sl, su], CompanySchedule[sl, su]] = 1);
 % Ensure that if an interview of student st with company c is scheduled according to Interview, the interview takes place once in Schedule:
-constraint forall(st in 1..students, c in 1..companies)(Interview[st, c] = 1 <-> count(Schedule[..,..,..,st], c) = 1);
+constraint forall(st in 1..students, c in 1..companies)(Interview[st, c] = 1 <-> count(Schedule[.., .. , st], c) = 1);
 % TODO: Fix
 % constraint forall(c in 1..companies)(global_cardinality(global_cardinality(), 1..students, Interview[..,c]))
 
 % Ensure that each student only has at most one interview during one slot:
-constraint forall(sl in 1..slots, d in 1..days)(global_cardinality_low_up(StudentSchedule[sl, d, ..], 0..students, [0 | i in 1..students], [1 | i in 1..students]));
+constraint forall(sl in 1..slots)(global_cardinality_low_up(StudentSchedule[sl, ..], 0..students, [0 | i in 1..students], [1 | i in 1..students]));
 % Ensure that each company has up to two interviews during one slot:
-constraint forall(sl in 1..slots, d in 1..days)(global_cardinality_low_up(CompanySchedule[sl,d,..], 0..companies, [0 | i in 1..companies], [2 | i in 1..companies]));
+constraint forall(sl in 1..slots)(global_cardinality_low_up(CompanySchedule[sl, ..], 0..companies, [0 | i in 1..companies], [2 | i in 1..companies]));
 
 constraint maxRegret = 1;
 constraint totalDisappointment = 0;
