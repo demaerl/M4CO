@@ -81,13 +81,15 @@ var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalD
 
 % TODO: Decide if redundant variables and/or channelling
 
-% StudentSchedule[sl, d , su] denotes the student that has an interview in slot sl, on day d, and in suite su:
+% StudentSchedule[sl, su] denotes the student that has an interview in slot sl, and in suite su:
 array[1..slots, 1..suites] of var 0..students: StudentSchedule; % non-mutually redundant with Schedule:
-% CompanySchedule[sl, d , su] denotes the company that has an interview in slot sl, on day d, and in suite su:
+% CompanySchedule[sl, su] denotes the company that has an interview in slot sl, and in suite su:
 array[1..slots, 1..suites] of var 0..companies: CompanySchedule; % non-mutually redundant with Schedule:
 % Schedule[sl, d, su, st] denotes with which company (if any) student st has an interview in slot sl on day d in suite su:
 array[1..slots, 1..suites, 1..students] of var 0..companies: Schedule;
+% array[1..students] of var set of int: StudentSuites;
 % Ensure that interviews are scheduled according to availability of students as indicated in Slot:
+% constraint forall(sl in 1..slots, su in 1..suites where StudentSchedule[sl, su] != 0)(count(Slot[..,StudentSchedule[sl,su]], sl) = 1);
 constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl, su, st] != 0)(count(Slot[..,st], sl) = 1);
 % 1-way channelling constraint from Schedule to StudentSchedule:
 constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Schedule[sl,su, st] != 0)(StudentSchedule[sl, su] = st);
@@ -97,7 +99,7 @@ constraint forall(sl in 1..slots, su in 1..suites, st in 1..students where Sched
 % constraint forall(sl in 1..slots, d in 1..days, su in 1..suites)(StudentSchedule[sl, d, su] = 0 <-> CompanySchedule[sl, d, su] = 0);
 % Ensure that at most one interview is held in each suite during one slot:
 constraint forall(sl in 1..slots, su in 1..suites)(count(Schedule[sl, su,..], 0) >= students-1);
-% Ensure that for each slot sl in the schedule, the company and student in suite su on day d have an interview (if any) scheduled according to Interview:
+% Ensure that for each slot sl in the schedule, the company and student on day d in suite su have an interview scheduled according to Interview:
 constraint forall(sl in 1..slots, d in 1..days, su in 1..suites where StudentSchedule[sl, su] != 0)(Interview[StudentSchedule[sl, su], CompanySchedule[sl, su]] = 1);
 % Ensure that if an interview of student st with company c is scheduled according to Interview, the interview takes place once in Schedule:
 constraint forall(st in 1..students, c in 1..companies)(Interview[st, c] = 1 <-> count(Schedule[.., .. , st], c) = 1);
@@ -115,8 +117,19 @@ constraint totalDisappointment = 0;
 %% Preference
 
 %% Company attendance cost
+% Attendance[c] denotes the number of days company c attends the conference:
+%array[1..companies] of var 0..5: Attendance;
+%array[1..companies] of var 0..20: CompanyFirstSlot;
+%array[1..companies] of var 0..20: CompanyLastSlot;
+%constraint forall(c in 1..companies)(not(c in CompanySchedule[1..CompanyFirstSlot[c]-1,..]));
+%constraint forall(c in 1..companies)();
+%array[1..companies] of var 0..5*max(DailyRate): AttendanceCost;
 
-%% Suite rental cost
+array[1..suites] of var {0,200}: SuiteRentalCost; % suite rental cost
+% For each suite where an interview is scheduled in (according to StudentSchedule), the rental coste is incurred for that suite:
+constraint forall(su in 1..suites where count(StudentSchedule[..,su], 0) < slots)(SuiteRentalCost[su] = 200);
+
+var 0..2400: totalRentalCost = sum(SuiteRentalCost); % total suite rental cost
 
 
 
