@@ -78,8 +78,6 @@ constraint forall(c in 1..companies where sum(Interview[..,c]) = 0)(IncurredDisa
 % Calculate the total disappointment:
 var 0..sum(Disappointment): totalDisappointment = sum(IncurredDisappointment);
 
-var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalDisappointment;
-
 %% ------ Day 3------
 
 % TODO: Decide if redundant variables and/or channelling
@@ -117,6 +115,12 @@ constraint forall(sl in 1..slots)(global_cardinality_low_up(CompanySchedule[sl, 
 constraint maxRegret = 1;
 constraint totalDisappointment = 0;
 
+%% Symmetry Breaking
+% Make sure that suite s is used before suite s+1:
+constraint symmetry_breaking_constraint(forall(sl in 1..slots, su in 1..suites-1)((StudentSchedule[sl,su] = 0 /\ StudentSchedule[sl,su+1] = 0) \/ (StudentSchedule[sl,su] > 0 /\ StudentSchedule[sl,su+1] >= 0)));
+% Make sure that the student in suite su has a higher identifier than the student in suite su+1
+constraint symmetry_breaking_constraint(forall(sl in 1..slots)(decreasing(StudentSchedule[sl,..])));
+
 %% Preference
 
 %% Company attendance cost
@@ -134,7 +138,7 @@ constraint forall(su in 1..suites where count(StudentSchedule[..,su], 0) < slots
 
 var 0..2400: totalRentalCost = sum(SuiteRentalCost); % total suite rental cost
 
-
+var int: obj = totalPreferenceCost + totalRentalCost;
 
 %----Objective----
 % Day 3: minimize max regret:, total preference cost and total disappointment:
