@@ -52,16 +52,19 @@ var 3*students..15*students: totalPreferenceCost = sum([Preference[s,c] * Interv
 
 %% ------ Day 2: Student regret ------
 
-% SortedPreference denotes the preferences of each student in sorted order: 
-array[1..students, 1..companies] of var 1..5: SortedPreference;
+% PreferenceCount[s, p] is the number of times (up to 3) student s expressed preference p, with 1 <= p <= 3: 
+array[1..students, 1..3] of 0..3: PrefCount = array2d(1..students, 1..3, [min(count(Preference[s, ..], p), 3) | s in 1..students, p in 1..3]);
+% IdealPrefCost[s] is for student s the sum of their three best preferences that are 3 or better:
+array[1..students] of 0..9: IdealPrefCost = [ PrefCount[s, 1] +
+					     2*min(3-PrefCount[s, 1], PrefCount[s, 2]) +
+					     3*min( max(3-PrefCount[s, 1]-PrefCount[s,2], 0), PrefCount[s, 3])
+					     | s in 1..students];
 % AssignedPreference[s] is the sum of the preferences of the interviews assigned to student s:
 array[1..students] of var 0..9: AssignedPreference = [ sum([Interview[s,c]*Preference[s,c] | c in 1..companies]) | s in 1..students];
 % Regret[s] denotes the regret, i.e. the difference between best indicated preferences and assigned preferences:
-array[1..students] of var 0..6: Regret = [ AssignedPreference[s] - sum([ SortedPreference[s,i] | i in 1..3 where SortedPreference[s,i] < 4]) | s in 1..students];
-% Sort preferences of students in ascending order:
-constraint forall(s in 1..students)(sort(Preference[s,..], SortedPreference[s,..]));
-
-var 0..6: maxRegret = max(Regret);
+array[1..students] of var 0..6: Regret = [AssignedPreference[s] - IdealPrefCost[s] | s in 1..students];
+% The maximum regret of any student
+var 0..6: maxRegret :: add_to_output = max(Regret);
 
 
 %% ------ Day 2: Company disappointment ------
