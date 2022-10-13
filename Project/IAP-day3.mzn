@@ -43,7 +43,7 @@ constraint forall(c in 1..companies)(sum(Interview[..,c]) in Lower[c]..Upper[c] 
 % Ensure that each student has the correct number of interviews:
 constraint forall(s in 1..students)(sum(Interview[s,..]) = StudentInterviews[s]);
 % Ensure that each student has interviews with companies according to Preference:
-constraint forall(s in 1..students, c in 1..companies where Interview[s,c] = 1)(Preference[s,c] <= 3);
+constraint forall(s in 1..students, c in 1..companies where Preference[s,c] >= 4)(Interview[s,c] = 0);
 
 %% ------ Preference cost ------
 
