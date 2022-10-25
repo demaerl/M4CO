@@ -2,9 +2,9 @@ include "globals.mzn";
 
 %%% ------ Parameters and derived parameters ------
 % weights for the objective function
-int: alpha = students * 15 * beta;
-int: beta = sum(Disappointment);
-int: gamma = 1;
+int: alpha = students * 15 * gamma;
+int: beta = 1;%sum(Disappointment);
+int: gamma = sum(Preference);%1;
 
 % enum of companies:
 enum Company = {AIMMS, SAS, Keelvar, Microsoft, Google, IBM, Cadence, Quintiq, Siemens, Cosling, COSYTEC, LocalSolver, Nside, UTRCI, Zoomer};
@@ -42,7 +42,8 @@ constraint forall(s in 1..students, c in 1..companies where Preference[s,c] >= 4
 %% ------ Preference cost ------
 
 % Total preference cost:
-var 3*students..15*students: totalPreferenceCost :: add_to_output= sum([Preference[s,c] * Interview[s,c] | s in 1..students, c in 1..companies]);
+%var 3*students..15*students: totalPreferenceCost :: add_to_output= sum([Preference[s,c] * Interview[s,c] | s in 1..students, c in 1..companies]);
+var 3*students..15*students: pref :: add_to_output= sum([Preference[s,c] * Interview[s,c] | s in 1..students, c in 1..companies]);
 
 %% ------ Day 2: Student regret ------
 
@@ -58,7 +59,7 @@ array[1..students] of var 0..9: AssignedPreference = [ sum([Interview[s,c]*Prefe
 % Regret[s] denotes the regret, i.e. the difference between best indicated preferences and assigned preferences:
 array[1..students] of var 0..6: Regret = [AssignedPreference[s] - IdealPrefCost[s] | s in 1..students];
 % The maximum regret of any student
-var 0..6: maxRegret :: add_to_output = max(Regret);
+var 0..6: reg :: add_to_output = max(Regret);
 
 
 %% ------ Day 2: Company disappointment ------
@@ -70,9 +71,10 @@ array[1..companies] of var 0..max(Disappointment): IncurredDisappointment;
 constraint forall(c in 1..companies where sum(Interview[..,c]) = 0)(IncurredDisappointment[c] = Disappointment[c]);
 
 % Calculate the total disappointment:
-var 0..sum(Disappointment): totalDisappointment :: add_to_output = sum(IncurredDisappointment);
+var 0..sum(Disappointment): dis :: add_to_output = sum(IncurredDisappointment);
 
-var int: obj = alpha * maxRegret + beta * totalPreferenceCost + gamma * totalDisappointment;
+%var int: obj = alpha * maxRegret + beta * totalPreferenceCost + gamma * totalDisappointment;
+var int: obj = alpha * reg + beta * pref + gamma * dis;
 
 
 %----Objective----
@@ -82,6 +84,16 @@ solve minimize obj;
 %solve minimize totalPreferenceCost;
 
 %----Output----
+output ["Preference: \n", show2d(Preference), "\n",
+	"Lower: \n", show(Lower), "\n",
+	"Upper: \n", show(Upper), "\n",
+	"Ideal Preference Cost\n", show(IdealPrefCost), "\n",
+	"\nVARIABLES:\n",
+	"Max Regret: \(reg) \nTotal Preference Cost: \(pref) \nTotal Company Dissapointment: \(dis)\n\n",
+	"Interview: \n", show2d(Interview), "\n",
+	"Assigned Preference: \n", show(AssignedPreference), "\n",
+	"Regret: \n", show(Regret), "\n",
+	"Disappointment: \n", show(IncurredDisappointment), "\n"];
 %output [show(max(Regret)), "\n"];
 %output [show(totalPreferenceCost), "\n"];
 %output [show(totalDisappointment)];
