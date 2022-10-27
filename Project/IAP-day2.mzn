@@ -50,9 +50,11 @@ array[1..students] of 0..9: IdealPrefCost = [ PrefCount[s, 1] +
 					     2*min(3-PrefCount[s, 1], PrefCount[s, 2]) +
 					     3*min( max(3-PrefCount[s, 1]-PrefCount[s,2], 0), PrefCount[s, 3])
 					     | s in 1..students];
-% AssignedPreference[s] is the sum of the preferences of the interviews assigned to student s:
+% AssignedPreference[s] is the sum of the preferences of the interviews assigned to student s.
+% AssignedPreference is non-mutually redundant with Interview:
 array[1..students] of var 0..9: AssignedPreference = [ sum([Interview[s,c]*Preference[s,c] | c in 1..companies]) | s in 1..students];
-% Regret[s] denotes the regret, i.e. the difference between best indicated preferences and assigned preferences:
+% Regret[s] denotes the regret, i.e. the difference between best indicated preferences and assigned preferences.
+% Regret is mutually redundant with AssignedPreference:
 array[1..students] of var 0..6: Regret = [AssignedPreference[s] - IdealPrefCost[s] | s in 1..students];
 % The maximum regret of any student
 var 0..6: maxRegret :: add_to_output = max(Regret);
@@ -74,4 +76,6 @@ var 0..sum(Disappointment): totalDisappointment :: add_to_output = sum(IncurredD
 % Day 2: Objective is weighted sum of regret, total student preference cost, and total company disappointment:
 var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalDisappointment;
 
-solve minimize obj; % minimize objective
+solve
+  :: int_search(Regret, first_fail, indomain_min)
+minimize obj; % minimize objective
