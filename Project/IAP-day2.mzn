@@ -74,7 +74,7 @@ var 0..sum(Disappointment): totalDisappointment :: add_to_output = sum(IncurredD
 
 %----Objective----
 % Day 2: Objective is weighted sum of regret, total student preference cost, and total company disappointment:
-var int: obj = alpha * max(Regret) + beta * totalPreferenceCost + gamma * totalDisappointment;
+var int: obj = alpha * maxRegret + beta * totalPreferenceCost + gamma * totalDisappointment;
 
 solve
   :: int_search(Regret, first_fail, indomain_min)
