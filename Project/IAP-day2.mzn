@@ -2,9 +2,9 @@ include "globals.mzn";
 
 %%% ------ Parameters and derived parameters ------
 % weights for the objective function
-int: alpha = students * 15 * beta;
+int: alpha = students * 15 * gamma;
 int: beta = 1;
-int: gamma = sum(Disappointment);
+int: gamma = sum(Preference);
 
 % enum of companies:
 enum Company = {AIMMS, SAS, Keelvar, Microsoft, Google, IBM, Cadence, Quintiq, Siemens, Cosling, COSYTEC, LocalSolver, Nside, UTRCI, Zoomer};
