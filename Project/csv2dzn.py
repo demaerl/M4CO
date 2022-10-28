@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 from pymzn import dzn
 
-def read_company(filename):
+def read_datafile(filename):
     data = pd.read_csv(filename)
     columns = list(data.columns)
     
@@ -19,7 +19,7 @@ def read_company(filename):
     
         
 if __name__ == "__main__":
-    read_company(sys.argv[1])
+    read_datafile(sys.argv[1])
     
     
 
