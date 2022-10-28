@@ -5,7 +5,7 @@ include "gecode.mzn";
 % weights for the objective function
 int: alpha = students * 15 * gamma;
 int: beta = 1;
-int: gamma = sum(Disappointment);
+int: gamma = sum(Preference);
 
 % Parameters for the LNS
 int: rho = 0;
